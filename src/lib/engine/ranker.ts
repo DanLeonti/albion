@@ -90,12 +90,7 @@ export async function rankProfits(
   // Collect all item IDs we need prices for
   const allItemIds = collectItemIds(filtered);
   const city = query.city ?? "Caerleon";
-  const locations = [city];
-
-  // Add Black Market as sell location option
-  if (city !== "Black Market") {
-    locations.push("Black Market");
-  }
+  const locations = [...CITIES];
 
   // Check cache first
   const cacheKey = `prices:${allItemIds.sort().join(",")}:${locations.join(",")}`;
