@@ -41,3 +41,20 @@ export function getAllSubcategories(category?: string): string[] {
   }
   return [...subs].sort();
 }
+
+export function getSubcategoriesByCategory(): Map<string, string[]> {
+  const map = new Map<string, Set<string>>();
+  for (const r of loadRecipes()) {
+    let set = map.get(r.category);
+    if (!set) {
+      set = new Set<string>();
+      map.set(r.category, set);
+    }
+    set.add(r.subcategory);
+  }
+  const result = new Map<string, string[]>();
+  for (const [cat, subs] of map) {
+    result.set(cat, [...subs].sort());
+  }
+  return result;
+}

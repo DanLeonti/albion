@@ -3,9 +3,14 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { TIERS, ENCHANTMENTS, CATEGORIES } from "@/lib/data/constants";
 import { CITIES } from "@/types/market";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import UnlocksModal, { parseUnlocksParam, useUnlocksSync } from "./UnlocksModal";
 
-export default function FilterBar() {
+interface FilterBarProps {
+  subcategoriesByCategory?: Record<string, string[]>;
+}
+
+export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -22,6 +27,16 @@ export default function FilterBar() {
     },
     [router, searchParams]
   );
+
+  const [showUnlocks, setShowUnlocks] = useState(false);
+
+  // Sync localStorage unlocks to URL on initial load
+  useUnlocksSync();
+
+  const unlocksParam = searchParams.get("unlocks") ?? "";
+  const unlockCount = unlocksParam
+    ? Object.keys(parseUnlocksParam(unlocksParam)).length
+    : 0;
 
   const currentTiers = searchParams.get("tiers") ?? "";
   const currentEnchants = searchParams.get("enchantments") ?? "";
@@ -128,6 +143,23 @@ export default function FilterBar() {
 
       {/* Second row */}
       <div className="flex items-center gap-6 mt-3 pt-3 border-t border-gray-700">
+        {/* My Crafts button */}
+        <button
+          onClick={() => setShowUnlocks(true)}
+          className={`px-3 py-1.5 text-sm rounded flex items-center gap-1.5 ${
+            unlockCount > 0
+              ? "bg-blue-600 text-white"
+              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+          }`}
+        >
+          My Crafts
+          {unlockCount > 0 && (
+            <span className="bg-blue-500 text-white text-xs rounded-full px-1.5 py-0.5 leading-none">
+              {unlockCount}
+            </span>
+          )}
+        </button>
+
         {/* Focus toggle */}
         <label className="flex items-center gap-2 cursor-pointer">
           <input
@@ -170,6 +202,12 @@ export default function FilterBar() {
           </select>
         </div>
       </div>
+
+      <UnlocksModal
+        open={showUnlocks}
+        onClose={() => setShowUnlocks(false)}
+        subcategoriesByCategory={subcategoriesByCategory}
+      />
     </div>
   );
 }

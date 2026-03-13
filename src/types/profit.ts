@@ -40,6 +40,7 @@ export interface ProfitQuery {
   sortOrder?: "asc" | "desc";
   page?: number;
   pageSize?: number;
+  unlocks?: Record<string, number>;  // subcategory → max tier
 }
 
 export type SortField =

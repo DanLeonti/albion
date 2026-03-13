@@ -4,6 +4,7 @@ import ProfitTable from "@/components/dashboard/ProfitTable";
 import Pagination from "@/components/dashboard/SortControls";
 import { TableSkeleton } from "@/components/ui/LoadingState";
 import { rankProfits } from "@/lib/engine/ranker";
+import { getSubcategoriesByCategory } from "@/lib/data/recipes";
 import type { ProfitQuery, SortField } from "@/types/profit";
 import type { Region } from "@/types/market";
 
@@ -19,6 +20,7 @@ interface DashboardProps {
     order?: string;
     page?: string;
     region?: string;
+    unlocks?: string;
   };
 }
 
@@ -35,6 +37,14 @@ async function DashboardContent({ searchParams }: DashboardProps) {
     sortBy: (searchParams.sort as SortField) ?? "profit",
     sortOrder: (searchParams.order as "asc" | "desc") ?? "desc",
     page: searchParams.page ? parseInt(searchParams.page) : 1,
+    unlocks: searchParams.unlocks
+      ? Object.fromEntries(
+          searchParams.unlocks.split(",").map((s) => {
+            const [sub, tier] = s.split(":");
+            return [sub, parseInt(tier)];
+          })
+        )
+      : undefined,
   };
 
   const region = (searchParams.region as Region) ?? "europe";
@@ -62,11 +72,17 @@ async function DashboardContent({ searchParams }: DashboardProps) {
 }
 
 export default function DashboardPage({ searchParams }: DashboardProps) {
+  const subcatMap = getSubcategoriesByCategory();
+  const subcategoriesByCategory: Record<string, string[]> = {};
+  for (const [cat, subs] of subcatMap) {
+    subcategoriesByCategory[cat] = subs;
+  }
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Crafting Profit Rankings</h1>
       <Suspense>
-        <FilterBar />
+        <FilterBar subcategoriesByCategory={subcategoriesByCategory} />
       </Suspense>
       <Suspense fallback={<TableSkeleton />}>
         <DashboardContent searchParams={searchParams} />

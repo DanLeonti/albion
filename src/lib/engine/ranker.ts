@@ -18,6 +18,10 @@ function filterRecipes(recipes: Recipe[], query: ProfitQuery): Recipe[] {
     if (query.tiers?.length && !query.tiers.includes(r.tier)) return false;
     if (query.enchantments?.length && !query.enchantments.includes(r.enchantment)) return false;
     if (query.categories?.length && !query.categories.includes(r.category)) return false;
+    if (query.unlocks && Object.keys(query.unlocks).length > 0) {
+      const maxTier = query.unlocks[r.subcategory];
+      if (maxTier === undefined || r.tier > maxTier) return false;
+    }
     return true;
   });
 }
