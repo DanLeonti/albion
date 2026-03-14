@@ -14,6 +14,7 @@ import { tierDisplay, tierColor } from "@/lib/utils/item-ids";
 import { formatPercent } from "@/lib/utils/formatting";
 import { CITIES, type Region } from "@/types/market";
 import RecipeTreeComponent from "@/components/item/RecipeTree";
+import ItemCitySelector from "@/components/item/ItemCitySelector";
 
 interface ItemPageProps {
   params: { itemId: string };
@@ -87,6 +88,10 @@ export default async function ItemPage({ params, searchParams }: ItemPageProps) 
             </div>
           </div>
         )}
+      </div>
+
+      <div className="mb-4">
+        <ItemCitySelector currentCity={city} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
