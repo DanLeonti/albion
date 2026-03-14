@@ -12,7 +12,12 @@ import type { AlbionPriceResponse } from "@/lib/api/types";
 
 /** Returns true if the item is a mob drop / artifact foundry conversion, not a player craft. */
 function isArtifactItem(itemId: string): boolean {
-  return itemId.includes("ARTEFACT") || /^T\d_(RUNE|SOUL|RELIC|SHARD_AVALONIAN)$/.test(itemId);
+  return (
+    itemId.includes("ARTEFACT") ||
+    /^T\d_(RUNE|SOUL|RELIC|SHARD_AVALONIAN)$/.test(itemId) ||
+    itemId.endsWith("_BP") ||
+    itemId.endsWith("_MAP")
+  );
 }
 
 /**

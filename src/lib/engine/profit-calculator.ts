@@ -103,7 +103,7 @@ export function calculateProfit(
   return {
     itemId: recipe.itemId,
     name: itemNames.get(recipe.itemId) ?? recipe.itemId,
-    isArtifact: recipe.itemId.includes("ARTEFACT") || /^T\d_(RUNE|SOUL|RELIC|SHARD_AVALONIAN)$/.test(recipe.itemId),
+    isArtifact: recipe.itemId.includes("ARTEFACT") || /^T\d_(RUNE|SOUL|RELIC|SHARD_AVALONIAN)$/.test(recipe.itemId) || recipe.itemId.endsWith("_BP") || recipe.itemId.endsWith("_MAP"),
     tier: recipe.tier,
     enchantment: recipe.enchantment,
     category: recipe.category,
