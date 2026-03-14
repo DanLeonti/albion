@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import type { Recipe } from "@/types/item";
 import { CITIES } from "@/types/market";
-import { loadRecipes, getAllCategories } from "@/lib/data/recipes";
+import { loadRecipes, getAllCategories, getSubcategoriesByCategory } from "@/lib/data/recipes";
 import { getItemNames } from "@/lib/data/items";
 import { calculateReturnRate } from "@/lib/engine/return-rate";
 import { calculateCraftingFee } from "@/lib/engine/crafting-fee";
@@ -19,8 +19,11 @@ export default function CraftCalculator() {
   const recipes = useMemo(() => loadRecipes(), []);
   const itemNames = useMemo(() => getItemNames(), []);
   const categories = useMemo(() => getAllCategories(), []);
+  const subcategoriesByCategory = useMemo(() => getSubcategoriesByCategory(), []);
 
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
+  const [selectedTier, setSelectedTier] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [materialCosts, setMaterialCosts] = useState<Record<string, number>>({});
@@ -29,20 +32,39 @@ export default function CraftCalculator() {
   const [selectedCity, setSelectedCity] = useState("Caerleon");
   const [feePercentage, setFeePercentage] = useState(3);
 
+  const subcategories = useMemo(() => {
+    if (!selectedCategory) return [];
+    return subcategoriesByCategory.get(selectedCategory) ?? [];
+  }, [subcategoriesByCategory, selectedCategory]);
+
+  const MAX_VISIBLE = 100;
+
   const filteredRecipes = useMemo(() => {
     let filtered = recipes;
     if (selectedCategory) {
       filtered = filtered.filter((r) => r.category === selectedCategory);
     }
+    if (selectedSubcategory) {
+      filtered = filtered.filter((r) => r.subcategory === selectedSubcategory);
+    }
+    if (selectedTier > 0) {
+      filtered = filtered.filter((r) => r.tier === selectedTier);
+    }
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const terms = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
       filtered = filtered.filter((r) => {
-        const name = itemNames.get(r.itemId) ?? r.itemId;
-        return name.toLowerCase().includes(q);
+        const name = (itemNames.get(r.itemId) ?? "").toLowerCase();
+        const id = r.itemId.toLowerCase();
+        const tier = tierDisplay(r.tier, r.enchantment).toLowerCase();
+        const searchable = `${name} ${id} ${tier}`;
+        return terms.every((term) => searchable.includes(term));
       });
     }
     return filtered;
-  }, [recipes, itemNames, selectedCategory, searchQuery]);
+  }, [recipes, itemNames, selectedCategory, selectedSubcategory, selectedTier, searchQuery]);
+
+  const totalCount = filteredRecipes.length;
+  const visibleRecipes = filteredRecipes.slice(0, MAX_VISIBLE);
 
   function selectRecipe(recipe: Recipe) {
     setSelectedRecipe(recipe);
@@ -84,10 +106,13 @@ export default function CraftCalculator() {
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
         {/* Left panel — Recipe Selector */}
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
-          <div className="space-y-3 mb-4">
+          <div className="space-y-2 mb-4">
             <select
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                setSelectedSubcategory("");
+              }}
               className={`${inputClass} w-full`}
             >
               <option value="">All Categories</option>
@@ -97,16 +122,45 @@ export default function CraftCalculator() {
                 </option>
               ))}
             </select>
+            {subcategories.length > 0 && (
+              <select
+                value={selectedSubcategory}
+                onChange={(e) => setSelectedSubcategory(e.target.value)}
+                className={`${inputClass} w-full`}
+              >
+                <option value="">All Subcategories</option>
+                {subcategories.map((sub) => (
+                  <option key={sub} value={sub}>
+                    {sub}
+                  </option>
+                ))}
+              </select>
+            )}
+            <select
+              value={selectedTier}
+              onChange={(e) => setSelectedTier(Number(e.target.value))}
+              className={`${inputClass} w-full`}
+            >
+              <option value={0}>All Tiers</option>
+              {[2, 3, 4, 5, 6, 7, 8].map((t) => (
+                <option key={t} value={t}>
+                  Tier {t}
+                </option>
+              ))}
+            </select>
             <input
               type="text"
-              placeholder="Search recipes..."
+              placeholder="Search by name, ID, or tier..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={`${inputClass} w-full`}
             />
+            <p className="text-xs text-gray-500">
+              {totalCount} recipes{totalCount > MAX_VISIBLE && ` (showing first ${MAX_VISIBLE})`}
+            </p>
           </div>
           <div className="max-h-[600px] overflow-y-auto space-y-1">
-            {filteredRecipes.map((recipe) => {
+            {visibleRecipes.map((recipe) => {
               const parsed = parseItemId(recipe.itemId);
               const name = itemNames.get(recipe.itemId) ?? recipe.itemId;
               const isSelected = selectedRecipe?.itemId === recipe.itemId;
