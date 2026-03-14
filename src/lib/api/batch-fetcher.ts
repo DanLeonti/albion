@@ -40,7 +40,12 @@ export async function batchFetchPrices(
         if (!results.has(price.item_id)) {
           results.set(price.item_id, new Map());
         }
-        results.get(price.item_id)!.set(price.city, price);
+        const cityMap = results.get(price.item_id)!;
+        const existing = cityMap.get(price.city);
+        // Keep lowest sell price across all qualities for each city
+        if (!existing || existing.sell_price_min <= 0 || (price.sell_price_min > 0 && price.sell_price_min < existing.sell_price_min)) {
+          cityMap.set(price.city, price);
+        }
       }
     }
   }

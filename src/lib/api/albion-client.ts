@@ -11,7 +11,7 @@ export async function fetchPrices(
   itemIds: string[],
   locations: string[],
   region: Region = DEFAULT_REGION,
-  qualities: number[] = [1]
+  qualities: number[] = [1, 2, 3, 4, 5]
 ): Promise<AlbionPriceResponse[]> {
   const ids = itemIds.join(",");
   const locs = locations.join(",");
