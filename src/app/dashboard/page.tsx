@@ -21,6 +21,7 @@ interface DashboardProps {
     page?: string;
     region?: string;
     unlocks?: string;
+    artifacts?: string;
   };
 }
 
@@ -45,6 +46,7 @@ async function DashboardContent({ searchParams }: DashboardProps) {
           })
         )
       : undefined,
+    hideArtifacts: searchParams.artifacts !== "show",
   };
 
   const region = (searchParams.region as Region) ?? "europe";

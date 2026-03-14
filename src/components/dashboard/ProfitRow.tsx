@@ -21,6 +21,11 @@ export default function ProfitRow({ item, rank }: ProfitRowProps) {
             <div className="text-sm text-white">{item.name}</div>
             <div className="text-xs" style={{ color: tierColor(item.tier) }}>
               {tierDisplay(item.tier, item.enchantment)} · {item.subcategory}
+              {item.isArtifact && (
+                <span className="ml-1 px-1 py-0.5 text-[10px] bg-red-900/50 text-red-400 rounded">
+                  Not Craftable
+                </span>
+              )}
             </div>
           </div>
         </Link>

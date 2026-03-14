@@ -43,6 +43,7 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
   const currentCategory = searchParams.get("category") ?? "";
   const currentCity = searchParams.get("city") ?? "Caerleon";
   const useFocus = searchParams.get("focus") === "true";
+  const hideArtifacts = searchParams.get("artifacts") !== "show";
   const feePercent = searchParams.get("fee") ?? "3";
 
   function toggleTier(tier: number) {
@@ -169,6 +170,17 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
             className="rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
           />
           <span className="text-sm text-gray-300">Use Focus</span>
+        </label>
+
+        {/* Show Artifacts toggle */}
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={!hideArtifacts}
+            onChange={(e) => updateParam("artifacts", e.target.checked ? "show" : "")}
+            className="rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
+          />
+          <span className="text-sm text-gray-300">Show Artifacts</span>
         </label>
 
         {/* Fee slider */}

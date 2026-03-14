@@ -103,6 +103,7 @@ export function calculateProfit(
   return {
     itemId: recipe.itemId,
     name: itemNames.get(recipe.itemId) ?? recipe.itemId,
+    isArtifact: recipe.itemId.includes("ARTEFACT"),
     tier: recipe.tier,
     enchantment: recipe.enchantment,
     category: recipe.category,

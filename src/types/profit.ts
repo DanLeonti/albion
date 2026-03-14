@@ -16,6 +16,7 @@ export interface ProfitResult {
   dailyVolume: number;
   /** Estimated silver per hour based on crafting speed */
   silverPerHour: number | null;
+  isArtifact: boolean;
   materials: MaterialCost[];
   lastUpdated: string;
 }
@@ -41,6 +42,7 @@ export interface ProfitQuery {
   page?: number;
   pageSize?: number;
   unlocks?: Record<string, number>;  // subcategory → max tier
+  hideArtifacts?: boolean;
 }
 
 export type SortField =
