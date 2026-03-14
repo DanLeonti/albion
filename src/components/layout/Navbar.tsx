@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import type { Region } from "@/types/market";
 
 const REGIONS: { value: Region; label: string }[] = [
@@ -12,6 +12,7 @@ const REGIONS: { value: Region; label: string }[] = [
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentRegion = (searchParams.get("region") ?? "europe") as Region;
 
@@ -28,8 +29,11 @@ export default function Navbar() {
           <Link href="/dashboard" className="text-lg font-bold text-white hover:text-blue-400 transition">
             Albion Craft Profit
           </Link>
-          <Link href="/dashboard" className="text-sm text-gray-400 hover:text-white transition">
+          <Link href="/dashboard" className={`text-sm transition ${pathname === "/dashboard" ? "text-white" : "text-gray-400 hover:text-white"}`}>
             Dashboard
+          </Link>
+          <Link href="/calculator" className={`text-sm transition ${pathname === "/calculator" ? "text-white" : "text-gray-400 hover:text-white"}`}>
+            Calculator
           </Link>
         </div>
         <div className="flex items-center gap-3">
