@@ -23,6 +23,7 @@ interface DashboardProps {
     region?: string;
     unlocks?: string;
     artifacts?: string;
+    maxage?: string;
   };
 }
 
@@ -48,6 +49,7 @@ async function DashboardContent({ searchParams }: DashboardProps) {
         )
       : undefined,
     hideArtifacts: searchParams.artifacts !== "show",
+    maxAge: searchParams.maxage ? parseInt(searchParams.maxage) : undefined,
   };
 
   const region = (searchParams.region as Region) ?? "europe";

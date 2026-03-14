@@ -5,6 +5,14 @@ import { tierDisplay, tierColor } from "@/lib/utils/item-ids";
 import { formatPercent, formatRelativeTime } from "@/lib/utils/formatting";
 import type { ProfitResult } from "@/types/profit";
 
+function getAgeColor(dateStr: string): string {
+  const ageMs = Date.now() - new Date(dateStr).getTime();
+  const ageHours = ageMs / (1000 * 60 * 60);
+  if (ageHours < 1) return "text-green-400";
+  if (ageHours < 24) return "text-yellow-400";
+  return "text-red-400";
+}
+
 interface ProfitRowProps {
   item: ProfitResult;
   rank: number;
@@ -47,7 +55,7 @@ export default function ProfitRow({ item, rank }: ProfitRowProps) {
           {formatPercent(item.profitMargin)}
         </span>
       </td>
-      <td className="py-2 px-3 text-right text-xs text-gray-500">
+      <td className={`py-2 px-3 text-right text-xs ${getAgeColor(item.lastUpdated)}`}>
         {formatRelativeTime(item.lastUpdated)}
       </td>
     </tr>

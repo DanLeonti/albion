@@ -56,6 +56,7 @@ export function calculateProfit(
   // Calculate material costs
   const materials: MaterialCost[] = [];
   let totalMaterialCost = 0;
+  let oldestDate = sellPriceData.sell_price_min_date;
 
   for (const mat of recipe.craftingRequirements) {
     const matPrices = prices.get(mat.itemId);
@@ -79,6 +80,11 @@ export function calculateProfit(
     }
 
     if (!bestPrice || bestPrice.sell_price_min <= 0) return null;
+
+    // Track oldest date across all data points
+    if (bestPrice.sell_price_min_date < oldestDate) {
+      oldestDate = bestPrice.sell_price_min_date;
+    }
 
     const unitPrice = bestPrice.sell_price_min;
     const totalPrice = unitPrice * mat.count;
@@ -117,6 +123,6 @@ export function calculateProfit(
     dailyVolume: 0, // Would need history API data
     silverPerHour: null,
     materials,
-    lastUpdated: sellPriceData.sell_price_min_date,
+    lastUpdated: oldestDate,
   };
 }

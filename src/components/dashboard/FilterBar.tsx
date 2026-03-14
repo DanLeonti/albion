@@ -198,6 +198,22 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
           <span className="text-sm text-gray-300 w-10">{feePercent}%</span>
         </div>
 
+        {/* Max Age */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-400">Max Age:</label>
+          <select
+            value={searchParams.get("maxage") ?? ""}
+            onChange={(e) => updateParam("maxage", e.target.value)}
+            className="bg-gray-800 text-white text-sm rounded px-2 py-1 border border-gray-600 focus:border-blue-500 focus:outline-none"
+          >
+            <option value="">Any</option>
+            <option value="1">1h</option>
+            <option value="6">6h</option>
+            <option value="24">24h</option>
+            <option value="72">3d</option>
+          </select>
+        </div>
+
         {/* Sort */}
         <div className="flex items-center gap-2 ml-auto">
           <label className="text-sm text-gray-400">Sort:</label>

@@ -43,6 +43,7 @@ export interface ProfitQuery {
   pageSize?: number;
   unlocks?: Record<string, number>;  // subcategory → max tier
   hideArtifacts?: boolean;
+  maxAge?: number; // max data age in hours
 }
 
 export type SortField =

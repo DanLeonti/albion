@@ -131,8 +131,17 @@ export async function rankProfits(
     }
   }
 
+  // Filter by max age
+  const filtered2 = query.maxAge
+    ? results.filter((r) => {
+        const ageMs = Date.now() - new Date(r.lastUpdated).getTime();
+        const ageHours = ageMs / (1000 * 60 * 60);
+        return ageHours <= query.maxAge!;
+      })
+    : results;
+
   // Sort
-  const sorted = sortResults(results, query.sortBy, query.sortOrder);
+  const sorted = sortResults(filtered2, query.sortBy, query.sortOrder);
 
   // Paginate
   const page = query.page ?? 1;
