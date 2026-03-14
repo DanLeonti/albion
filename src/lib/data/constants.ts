@@ -16,8 +16,8 @@ export const CITY_BONUS_RETURN_MULTIPLIER = 1.15;
 /** Number of items per page in dashboard */
 export const PAGE_SIZE = 50;
 
-/** Cache TTL in milliseconds (5 minutes) */
-export const CACHE_TTL = 5 * 60 * 1000;
+/** Cache TTL in milliseconds (30 seconds) */
+export const CACHE_TTL = 30 * 1000;
 
 /** Max items per API batch request (~120 to stay under 4096 URL chars) */
 export const BATCH_SIZE = 120;

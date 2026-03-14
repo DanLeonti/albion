@@ -3,6 +3,7 @@ import FilterBar from "@/components/dashboard/FilterBar";
 import ProfitTable from "@/components/dashboard/ProfitTable";
 import Pagination from "@/components/dashboard/SortControls";
 import { TableSkeleton } from "@/components/ui/LoadingState";
+import AutoRefresh from "@/components/dashboard/AutoRefresh";
 import { rankProfits } from "@/lib/engine/ranker";
 import { getSubcategoriesByCategory } from "@/lib/data/recipes";
 import type { ProfitQuery, SortField } from "@/types/profit";
@@ -82,7 +83,10 @@ export default function DashboardPage({ searchParams }: DashboardProps) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Crafting Profit Rankings</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        Crafting Profit Rankings
+        <AutoRefresh />
+      </h1>
       <Suspense>
         <FilterBar subcategoriesByCategory={subcategoriesByCategory} />
       </Suspense>

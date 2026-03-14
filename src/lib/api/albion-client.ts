@@ -22,7 +22,7 @@ export async function fetchPrices(
     throw new Error(`URL exceeds 4096 char limit (${url.length}). Reduce batch size.`);
   }
 
-  const res = await fetch(url, { next: { revalidate: 300 } });
+  const res = await fetch(url, { next: { revalidate: 30 } });
   if (!res.ok) {
     throw new Error(`Albion API error: ${res.status} ${res.statusText}`);
   }
@@ -36,7 +36,7 @@ export async function fetchHistory(
 ): Promise<AlbionHistoryResponse[]> {
   const locs = locations.join(",");
   const url = `${getBaseUrl(region)}/api/v2/stats/history/${itemId}.json?locations=${locs}&time-scale=6`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
+  const res = await fetch(url, { next: { revalidate: 30 } });
   if (!res.ok) {
     throw new Error(`Albion API error: ${res.status} ${res.statusText}`);
   }
@@ -47,7 +47,7 @@ export async function fetchGoldPrices(
   region: Region = DEFAULT_REGION
 ): Promise<{ price: number; timestamp: string }[]> {
   const url = `${getBaseUrl(region)}/api/v2/stats/gold.json?count=24`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
+  const res = await fetch(url, { next: { revalidate: 30 } });
   if (!res.ok) {
     throw new Error(`Albion API error: ${res.status} ${res.statusText}`);
   }
