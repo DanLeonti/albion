@@ -32,23 +32,21 @@ export function calculateProfit(
   const { city, useFocus, feePercentage } = options;
   const sellCity = options.sellCity ?? city;
 
-  // Get sell price for crafted item — use lowest sell_price_min across all cities
+  // Get sell price for crafted item in the selected city
   const itemPrices = prices.get(recipe.itemId);
   if (!itemPrices) return null;
 
   let sellPriceData: AlbionPriceResponse | undefined;
   let actualSellCity = sellCity;
-  let lowestSellPrice = Infinity;
 
-  for (const [c, p] of itemPrices) {
-    if (p.sell_price_min > 0 && p.sell_price_min < lowestSellPrice) {
-      lowestSellPrice = p.sell_price_min;
-      sellPriceData = p;
-      actualSellCity = c;
-    }
+  // Use selected city price
+  const cityPrice = itemPrices.get(sellCity);
+  if (cityPrice && cityPrice.sell_price_min > 0) {
+    sellPriceData = cityPrice;
   }
 
-  if (!sellPriceData || lowestSellPrice === Infinity) return null;
+  // No data for selected city — skip this item
+  if (!sellPriceData) return null;
 
   const sellPrice = sellPriceData.sell_price_min;
   const returnRate = calculateReturnRate(useFocus, city, recipe.craftingCategory);
