@@ -10,6 +10,11 @@ import { CITIES, type City } from "@/types/market";
 import { PAGE_SIZE } from "@/lib/data/constants";
 import type { AlbionPriceResponse } from "@/lib/api/types";
 
+/** Returns true if the item is a mob drop / artifact foundry conversion, not a player craft. */
+function isArtifactItem(itemId: string): boolean {
+  return itemId.includes("ARTEFACT") || /^T\d_(RUNE|SOUL|RELIC|SHARD_AVALONIAN)$/.test(itemId);
+}
+
 /**
  * Filter recipes based on query parameters.
  */
@@ -18,7 +23,7 @@ function filterRecipes(recipes: Recipe[], query: ProfitQuery): Recipe[] {
     if (query.tiers?.length && !query.tiers.includes(r.tier)) return false;
     if (query.enchantments?.length && !query.enchantments.includes(r.enchantment)) return false;
     if (query.categories?.length && !query.categories.includes(r.category)) return false;
-    if (query.hideArtifacts !== false && r.itemId.includes("ARTEFACT")) return false;
+    if (query.hideArtifacts !== false && isArtifactItem(r.itemId)) return false;
     if (query.unlocks && Object.keys(query.unlocks).length > 0) {
       const maxTier = query.unlocks[r.subcategory];
       if (maxTier === undefined || r.tier > maxTier) return false;
