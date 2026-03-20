@@ -3,14 +3,11 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { TIERS, ENCHANTMENTS, CATEGORIES, CATEGORY_LABELS } from "@/lib/data/constants";
 import { CITIES } from "@/types/market";
-import { useCallback, useState } from "react";
-import UnlocksModal, { parseUnlocksParam, useUnlocksSync } from "./UnlocksModal";
+import { useCallback } from "react";
 
-interface FilterBarProps {
-  subcategoriesByCategory?: Record<string, string[]>;
-}
+const TRADE_CITIES = CITIES.filter((c) => c !== "Black Market");
 
-export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarProps) {
+export default function TradeRouteFilterBar() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -23,28 +20,16 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
         params.delete(key);
       }
       params.delete("page"); // Reset page on filter change
-      router.push(`/dashboard?${params.toString()}`);
+      router.push(`/trade-routes?${params.toString()}`);
     },
     [router, searchParams]
   );
 
-  const [showUnlocks, setShowUnlocks] = useState(false);
-
-  // Sync localStorage unlocks to URL on initial load
-  useUnlocksSync();
-
-  const unlocksParam = searchParams.get("unlocks") ?? "";
-  const unlockCount = unlocksParam
-    ? Object.keys(parseUnlocksParam(unlocksParam)).length
-    : 0;
-
+  const currentFrom = searchParams.get("from") ?? "Caerleon";
+  const currentTo = searchParams.get("to") ?? "Black Market";
   const currentTiers = searchParams.get("tiers") ?? "";
   const currentEnchants = searchParams.get("enchantments") ?? "";
   const currentCategory = searchParams.get("category") ?? "";
-  const currentCity = searchParams.get("city") ?? "Caerleon";
-  const useFocus = searchParams.get("focus") === "true";
-  const hideArtifacts = searchParams.get("artifacts") !== "show";
-  const feePercent = searchParams.get("fee") ?? "3";
 
   function toggleTier(tier: number) {
     const tiers = currentTiers ? currentTiers.split(",").map(Number) : [];
@@ -68,6 +53,38 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
   return (
     <div className="bg-albion-darker rounded-lg p-4 mb-4 border border-gray-700">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* From City */}
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">From City (Buy)</label>
+          <select
+            value={currentFrom}
+            onChange={(e) => updateParam("from", e.target.value)}
+            className="w-full bg-gray-800 text-white text-sm rounded px-2 py-1.5 border border-gray-600 focus:border-blue-500 focus:outline-none"
+          >
+            {TRADE_CITIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* To City */}
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">To City (Sell)</label>
+          <select
+            value={currentTo}
+            onChange={(e) => updateParam("to", e.target.value)}
+            className="w-full bg-gray-800 text-white text-sm rounded px-2 py-1.5 border border-gray-600 focus:border-blue-500 focus:outline-none"
+          >
+            {CITIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Tier filter */}
         <div>
           <label className="block text-xs text-gray-400 mb-1">Tier</label>
@@ -107,14 +124,17 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
             ))}
           </div>
         </div>
+      </div>
 
+      {/* Second row */}
+      <div className="flex items-center gap-6 mt-3 pt-3 border-t border-gray-700 flex-wrap">
         {/* Category */}
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">Category</label>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-400">Category:</label>
           <select
             value={currentCategory}
             onChange={(e) => updateParam("category", e.target.value)}
-            className="w-full bg-gray-800 text-white text-sm rounded px-2 py-1.5 border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="bg-gray-800 text-white text-sm rounded px-2 py-1 border border-gray-600 focus:border-blue-500 focus:outline-none"
           >
             <option value="">All Categories</option>
             {CATEGORIES.map((c) => (
@@ -125,77 +145,16 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
           </select>
         </div>
 
-        {/* City */}
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">Crafting City</label>
-          <select
-            value={currentCity}
-            onChange={(e) => updateParam("city", e.target.value)}
-            className="w-full bg-gray-800 text-white text-sm rounded px-2 py-1.5 border border-gray-600 focus:border-blue-500 focus:outline-none"
-          >
-            {CITIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Second row */}
-      <div className="flex items-center gap-6 mt-3 pt-3 border-t border-gray-700">
-        {/* My Crafts button */}
-        <button
-          onClick={() => setShowUnlocks(true)}
-          className={`px-3 py-1.5 text-sm rounded flex items-center gap-1.5 ${
-            unlockCount > 0
-              ? "bg-blue-600 text-white"
-              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-          }`}
-        >
-          My Crafts
-          {unlockCount > 0 && (
-            <span className="bg-blue-500 text-white text-xs rounded-full px-1.5 py-0.5 leading-none">
-              {unlockCount}
-            </span>
-          )}
-        </button>
-
-        {/* Focus toggle */}
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={useFocus}
-            onChange={(e) => updateParam("focus", e.target.checked ? "true" : "")}
-            className="rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-300">Use Focus</span>
-        </label>
-
-        {/* Show Artifacts toggle */}
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={!hideArtifacts}
-            onChange={(e) => updateParam("artifacts", e.target.checked ? "show" : "")}
-            className="rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-300">Show Artifacts</span>
-        </label>
-
-        {/* Fee slider */}
+        {/* Min Profit */}
         <div className="flex items-center gap-2">
-          <label className="text-sm text-gray-400">Fee:</label>
+          <label className="text-sm text-gray-400">Min Profit:</label>
           <input
-            type="range"
-            min="0"
-            max="50"
-            step="1"
-            value={feePercent}
-            onChange={(e) => updateParam("fee", e.target.value)}
-            className="w-24"
+            type="number"
+            placeholder="0"
+            value={searchParams.get("minprofit") ?? ""}
+            onChange={(e) => updateParam("minprofit", e.target.value)}
+            className="w-24 bg-gray-800 text-white text-sm rounded px-2 py-1 border border-gray-600 focus:border-blue-500 focus:outline-none"
           />
-          <span className="text-sm text-gray-300 w-10">{feePercent}%</span>
         </div>
 
         {/* Max Age */}
@@ -224,18 +183,12 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
           >
             <option value="profit">Profit</option>
             <option value="profitMargin">Margin %</option>
+            <option value="buyPrice">Buy Price</option>
             <option value="sellPrice">Sell Price</option>
-            <option value="materialCost">Material Cost</option>
             <option value="name">Name</option>
           </select>
         </div>
       </div>
-
-      <UnlocksModal
-        open={showUnlocks}
-        onClose={() => setShowUnlocks(false)}
-        subcategoriesByCategory={subcategoriesByCategory}
-      />
     </div>
   );
 }

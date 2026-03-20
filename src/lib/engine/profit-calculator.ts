@@ -60,24 +60,7 @@ export function calculateProfit(
 
   for (const mat of recipe.craftingRequirements) {
     const matPrices = prices.get(mat.itemId);
-    // Try to buy in same city, fallback to any city with data
-    let bestPrice: AlbionPriceResponse | undefined;
-    let buyCity = city;
-
-    if (matPrices) {
-      bestPrice = matPrices.get(city);
-      if (!bestPrice || bestPrice.sell_price_min <= 0) {
-        // Find cheapest across all cities
-        let minPrice = Infinity;
-        for (const [c, p] of matPrices) {
-          if (p.sell_price_min > 0 && p.sell_price_min < minPrice) {
-            minPrice = p.sell_price_min;
-            bestPrice = p;
-            buyCity = c;
-          }
-        }
-      }
-    }
+    const bestPrice = matPrices?.get(city);
 
     if (!bestPrice || bestPrice.sell_price_min <= 0) return null;
 
@@ -96,7 +79,7 @@ export function calculateProfit(
       quantity: mat.count,
       unitPrice,
       totalPrice,
-      buyCity,
+      buyCity: city,
     });
   }
 

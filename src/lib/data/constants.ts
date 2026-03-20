@@ -34,15 +34,25 @@ export const ENCHANTMENTS = [0, 1, 2, 3, 4] as const;
 /** Item categories for filtering */
 export const CATEGORIES = [
   "weapon",
-  "armor",
-  "accessory",
+  "other",
   "consumable",
   "material",
   "mount",
   "tool",
-  "offhand",
   "bag",
   "cape",
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];
+
+/** Human-readable labels for categories */
+export const CATEGORY_LABELS: Record<string, string> = {
+  weapon: "Weapons",
+  other: "Armor & Resources",
+  consumable: "Consumables",
+  material: "Refined Materials",
+  mount: "Mounts",
+  tool: "Tools & Gathering",
+  bag: "Bags",
+  cape: "Capes",
+};

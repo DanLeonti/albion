@@ -7,7 +7,7 @@ import { loadRecipes, getAllCategories, getSubcategoriesByCategory } from "@/lib
 import { getItemNames } from "@/lib/data/items";
 import { calculateReturnRate } from "@/lib/engine/return-rate";
 import { calculateCraftingFee } from "@/lib/engine/crafting-fee";
-import { MARKET_TAX } from "@/lib/data/constants";
+import { MARKET_TAX, CATEGORY_LABELS } from "@/lib/data/constants";
 import { tierDisplay, tierColor, parseItemId } from "@/lib/utils/item-ids";
 import ItemIcon from "@/components/ui/ItemIcon";
 import SilverDisplay from "@/components/ui/SilverDisplay";
@@ -118,7 +118,7 @@ export default function CraftCalculator() {
               <option value="">All Categories</option>
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat}
+                  {CATEGORY_LABELS[cat] ?? cat.charAt(0).toUpperCase() + cat.slice(1)}
                 </option>
               ))}
             </select>

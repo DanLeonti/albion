@@ -4,15 +4,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { TIERS, ENCHANTMENTS, CATEGORIES, CATEGORY_LABELS } from "@/lib/data/constants";
 import { CITIES } from "@/types/market";
 import { useCallback, useState } from "react";
-import UnlocksModal, { parseUnlocksParam, useUnlocksSync } from "./UnlocksModal";
 
-interface FilterBarProps {
-  subcategoriesByCategory?: Record<string, string[]>;
-}
+const ROYAL_CITIES = CITIES.filter((c) => c !== "Black Market");
 
-export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarProps) {
+export default function FlipFilterBar() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "");
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -22,29 +20,17 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
       } else {
         params.delete(key);
       }
-      params.delete("page"); // Reset page on filter change
-      router.push(`/dashboard?${params.toString()}`);
+      params.delete("page");
+      router.push(`/flipper?${params.toString()}`);
     },
     [router, searchParams]
   );
 
-  const [showUnlocks, setShowUnlocks] = useState(false);
-
-  // Sync localStorage unlocks to URL on initial load
-  useUnlocksSync();
-
-  const unlocksParam = searchParams.get("unlocks") ?? "";
-  const unlockCount = unlocksParam
-    ? Object.keys(parseUnlocksParam(unlocksParam)).length
-    : 0;
-
   const currentTiers = searchParams.get("tiers") ?? "";
   const currentEnchants = searchParams.get("enchantments") ?? "";
   const currentCategory = searchParams.get("category") ?? "";
-  const currentCity = searchParams.get("city") ?? "Caerleon";
-  const useFocus = searchParams.get("focus") === "true";
-  const hideArtifacts = searchParams.get("artifacts") !== "show";
-  const feePercent = searchParams.get("fee") ?? "3";
+  const currentBuyCities = searchParams.get("buyCities") ?? "";
+  const currentSellCities = searchParams.get("sellCities") ?? "";
 
   function toggleTier(tier: number) {
     const tiers = currentTiers ? currentTiers.split(",").map(Number) : [];
@@ -62,13 +48,80 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
     updateParam("enchantments", enchs.join(","));
   }
 
+  function toggleBuyCity(city: string) {
+    const cities = currentBuyCities ? currentBuyCities.split(",") : [];
+    const idx = cities.indexOf(city);
+    if (idx >= 0) cities.splice(idx, 1);
+    else cities.push(city);
+    updateParam("buyCities", cities.join(","));
+  }
+
+  function toggleSellCity(city: string) {
+    const cities = currentSellCities ? currentSellCities.split(",") : [];
+    const idx = cities.indexOf(city);
+    if (idx >= 0) cities.splice(idx, 1);
+    else cities.push(city);
+    updateParam("sellCities", cities.join(","));
+  }
+
   const activeTiers = currentTiers ? currentTiers.split(",").map(Number) : [];
   const activeEnchs = currentEnchants ? currentEnchants.split(",").map(Number) : [];
+  const activeBuyCities = currentBuyCities ? currentBuyCities.split(",") : [];
+  const activeSellCities = currentSellCities ? currentSellCities.split(",") : [];
 
   return (
     <div className="bg-albion-darker rounded-lg p-4 mb-4 border border-gray-700">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Tier filter */}
+      {/* Row 1: Buy From / Sell To cities */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">Buy From (select cities)</label>
+          <div className="flex gap-1 flex-wrap">
+            {ROYAL_CITIES.map((c) => (
+              <button
+                key={c}
+                onClick={() => toggleBuyCity(c)}
+                className={`px-2 py-1 text-xs rounded ${
+                  activeBuyCities.includes(c)
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+          {activeBuyCities.length === 0 && (
+            <span className="text-[10px] text-gray-500 mt-0.5">All royal cities</span>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">Sell To (select cities)</label>
+          <div className="flex gap-1 flex-wrap">
+            {[...CITIES].map((c) => (
+              <button
+                key={c}
+                onClick={() => toggleSellCity(c)}
+                className={`px-2 py-1 text-xs rounded ${
+                  activeSellCities.includes(c)
+                    ? c === "Black Market"
+                      ? "bg-red-700 text-white"
+                      : "bg-green-700 text-white"
+                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+          {activeSellCities.length === 0 && (
+            <span className="text-[10px] text-gray-500 mt-0.5">All cities + Black Market</span>
+          )}
+        </div>
+      </div>
+
+      {/* Row 2: Tier, Enchantment, Category, Search */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-3 pt-3 border-t border-gray-700">
         <div>
           <label className="block text-xs text-gray-400 mb-1">Tier</label>
           <div className="flex gap-1 flex-wrap">
@@ -88,7 +141,6 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
           </div>
         </div>
 
-        {/* Enchantment filter */}
         <div>
           <label className="block text-xs text-gray-400 mb-1">Enchantment</label>
           <div className="flex gap-1 flex-wrap">
@@ -108,7 +160,6 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
           </div>
         </div>
 
-        {/* Category */}
         <div>
           <label className="block text-xs text-gray-400 mb-1">Category</label>
           <select
@@ -125,80 +176,54 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
           </select>
         </div>
 
-        {/* City */}
         <div>
-          <label className="block text-xs text-gray-400 mb-1">Crafting City</label>
-          <select
-            value={currentCity}
-            onChange={(e) => updateParam("city", e.target.value)}
-            className="w-full bg-gray-800 text-white text-sm rounded px-2 py-1.5 border border-gray-600 focus:border-blue-500 focus:outline-none"
+          <label className="block text-xs text-gray-400 mb-1">Search</label>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              updateParam("search", searchInput.trim());
+            }}
           >
-            {CITIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onBlur={() => updateParam("search", searchInput.trim())}
+              placeholder="Search items..."
+              className="w-full bg-gray-800 text-white text-sm rounded px-2 py-1.5 border border-gray-600 focus:border-blue-500 focus:outline-none"
+            />
+          </form>
         </div>
       </div>
 
-      {/* Second row */}
-      <div className="flex items-center gap-6 mt-3 pt-3 border-t border-gray-700">
-        {/* My Crafts button */}
-        <button
-          onClick={() => setShowUnlocks(true)}
-          className={`px-3 py-1.5 text-sm rounded flex items-center gap-1.5 ${
-            unlockCount > 0
-              ? "bg-blue-600 text-white"
-              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-          }`}
-        >
-          My Crafts
-          {unlockCount > 0 && (
-            <span className="bg-blue-500 text-white text-xs rounded-full px-1.5 py-0.5 leading-none">
-              {unlockCount}
-            </span>
-          )}
-        </button>
-
-        {/* Focus toggle */}
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={useFocus}
-            onChange={(e) => updateParam("focus", e.target.checked ? "true" : "")}
-            className="rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-300">Use Focus</span>
-        </label>
-
-        {/* Show Artifacts toggle */}
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={!hideArtifacts}
-            onChange={(e) => updateParam("artifacts", e.target.checked ? "show" : "")}
-            className="rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-300">Show Artifacts</span>
-        </label>
-
-        {/* Fee slider */}
+      {/* Row 3: Min Profit, Min Margin, Max Age, Sort */}
+      <div className="flex items-center gap-6 mt-3 pt-3 border-t border-gray-700 flex-wrap">
         <div className="flex items-center gap-2">
-          <label className="text-sm text-gray-400">Fee:</label>
+          <label className="text-sm text-gray-400">Min Profit:</label>
           <input
-            type="range"
-            min="0"
-            max="50"
-            step="1"
-            value={feePercent}
-            onChange={(e) => updateParam("fee", e.target.value)}
-            className="w-24"
+            type="number"
+            value={searchParams.get("minProfit") ?? ""}
+            onChange={(e) => updateParam("minProfit", e.target.value)}
+            placeholder="0"
+            className="w-24 bg-gray-800 text-white text-sm rounded px-2 py-1 border border-gray-600 focus:border-blue-500 focus:outline-none"
           />
-          <span className="text-sm text-gray-300 w-10">{feePercent}%</span>
         </div>
 
-        {/* Max Age */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-400">Min Margin:</label>
+          <input
+            type="number"
+            value={searchParams.get("minMargin") ?? ""}
+            onChange={(e) => updateParam("minMargin", e.target.value)}
+            placeholder="0"
+            min="0"
+            max="100"
+            step="1"
+            className="w-20 bg-gray-800 text-white text-sm rounded px-2 py-1 border border-gray-600 focus:border-blue-500 focus:outline-none"
+          />
+          <span className="text-sm text-gray-500">%</span>
+        </div>
+
         <div className="flex items-center gap-2">
           <label className="text-sm text-gray-400">Max Age:</label>
           <select
@@ -214,7 +239,6 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
           </select>
         </div>
 
-        {/* Sort */}
         <div className="flex items-center gap-2 ml-auto">
           <label className="text-sm text-gray-400">Sort:</label>
           <select
@@ -225,17 +249,11 @@ export default function FilterBar({ subcategoriesByCategory = {} }: FilterBarPro
             <option value="profit">Profit</option>
             <option value="profitMargin">Margin %</option>
             <option value="sellPrice">Sell Price</option>
-            <option value="materialCost">Material Cost</option>
+            <option value="buyPrice">Buy Price</option>
             <option value="name">Name</option>
           </select>
         </div>
       </div>
-
-      <UnlocksModal
-        open={showUnlocks}
-        onClose={() => setShowUnlocks(false)}
-        subcategoriesByCategory={subcategoriesByCategory}
-      />
     </div>
   );
 }

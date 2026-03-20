@@ -35,6 +35,21 @@ export default function Navbar() {
           <Link href="/calculator" className={`text-sm transition ${pathname === "/calculator" ? "text-white" : "text-gray-400 hover:text-white"}`}>
             Calculator
           </Link>
+          <Link href="/flipper" className={`text-sm transition ${pathname === "/flipper" ? "text-white" : "text-gray-400 hover:text-white"}`}>
+            Flipper
+          </Link>
+          <Link href="/prices" className={`text-sm transition ${pathname === "/prices" ? "text-white" : "text-gray-400 hover:text-white"}`}>
+            Prices
+          </Link>
+          <Link href="/trade-routes" className={`text-sm transition ${pathname === "/trade-routes" ? "text-white" : "text-gray-400 hover:text-white"}`}>
+            Trade Routes
+          </Link>
+          <Link href="/charts" className={`text-sm transition ${pathname === "/charts" ? "text-white" : "text-gray-400 hover:text-white"}`}>
+            Charts
+          </Link>
+          <Link href="/top-items" className={`text-sm transition ${pathname === "/top-items" ? "text-white" : "text-gray-400 hover:text-white"}`}>
+            Top Items
+          </Link>
         </div>
         <div className="flex items-center gap-3">
           <label className="text-xs text-gray-400">Region:</label>
